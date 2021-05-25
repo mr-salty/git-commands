@@ -1,0 +1,52 @@
+#! /bin/sh
+# creates a new "client"
+
+repo_stub="$1"
+dir="$2"
+
+if [[ -z "${repo_stub}" ]]; then
+  echo "Usage $0 repo [dir]"
+  exit 1
+fi
+
+# TODO make this work better
+upstream="git@github.com:${repo_stub}.git"
+fork=$(echo "${repo_stub}" | sed -e 's/.*\//mr-salty\//')
+repo="git@github.com:${fork}.git"
+
+echo "Using repo '${repo}'"
+echo "  upstream '${upstream}'"
+
+use_main=0
+if [[ -z "${dir}" ]]; then
+  dir=$(expr match "${repo}" '.*/\([^/]*\)\.git')
+  if [[ -z "${dir}" ]]; then
+    echo "unable to determine directory from '${repo}'"
+    exit 1
+  fi
+  use_main=1
+fi
+echo "Using directory '${dir}'"
+
+if [[ -e "${dir}" ]]; then
+  echo "Directory '${dir}' must not exist"
+  exit 1
+fi
+
+git clone "${repo}" "${dir}"
+cd "${dir}"
+git remote add -f upstream "${upstream}"
+
+if [[ ${use_main} == 0 ]]; then
+  if git branch -a | grep "remotes/origin/${dir}$"; then
+    echo "checking out existing branch origin/${dir}"
+    git checkout -t "origin/${dir}"
+  else
+    echo "creating new branch origin/${dir}"
+    git checkout -b "${dir}"
+    git push --set-upstream origin "${dir}"
+  fi
+fi
+
+echo ""
+echo "cd ${dir}"

@@ -1,0 +1,45 @@
+#! /bin/sh -e
+# 
+# "sync" a git client, similar to `p4 sync`.
+# - pulls changes from upstream into the main branch
+# - updates the main branch on origin if possible
+# - if not on the main branch, stash any changes and rebase
+
+bold="$(tput bold)"
+normal="$(tput sgr0)"
+
+run() {
+  echo "${bold}\$ $@${normal}"
+  $@
+}
+
+branch="$(git branch | grep \* | cut -d ' ' -f2)"
+main_branch="$(git main-branch)"
+if [[ "${branch}" != "${main_branch}" ]]; then
+  echo "${bold}Rebasing ${branch} to ${main_branch}${normal}"
+  run git stash --include-untracked
+  run git checkout "${main_branch}"
+else
+  echo "${bold}Updating ${main_branch}${normal}"
+fi
+echo ""
+
+run git pull --ff-only upstream "${main_branch}"
+
+# if I don't own the repo, don't try to push to it.
+if [[ $(git remote show -n origin | grep 'Push.*URL' | cut -d: -f3 | \
+      cut -d/ -f1) != "$(git user)" ]]; then
+  run git pull --ff-only origin "${main_branch}"
+  echo "Non-owned repo; not pushing"
+  exit 0
+fi
+
+run git push
+
+if [[ "${branch}" != "${main_branch}" ]]; then
+  run git checkout "${branch}"
+  run git rebase "${main_branch}"
+  run git push
+  # todo: only pop if push did anything
+  run git stash pop
+fi

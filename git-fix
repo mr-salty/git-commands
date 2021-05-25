@@ -1,0 +1,7 @@
+#! /bin/sh -e
+#
+# just runs style checking/formatting
+
+cd $(git root)
+git add .
+./ci/kokoro/docker/build.sh clang-tidy ./ci/check-style.sh

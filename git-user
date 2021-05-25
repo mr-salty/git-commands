@@ -1,0 +1,5 @@
+#! /bin/sh
+# displays your git username.
+
+hub api -t user | awk '/^\.login/ { print $2 }'
+

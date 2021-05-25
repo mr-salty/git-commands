@@ -1,0 +1,25 @@
+#! /bin/sh -e
+
+# syncs all "Master" clients (-a = really sync all)
+
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+projects=(google-cloud-cpp)
+if [ "$1" == "-a" ]; then
+  # really sync-all
+  projects+=(googleapis grpc java-spanner)
+fi
+
+
+cd ${HOME}/git/Masters
+for dir in ${projects[@]}; do
+  if [[ -d ${dir} ]]; then
+    echo "${bold}------------------------------------------------${normal}"
+    echo "${bold}Syncing ${dir}${normal}"
+    cd ${dir}
+    git sync
+    cd ..
+    echo ""
+  fi
+done

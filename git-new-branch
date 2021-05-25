@@ -1,0 +1,54 @@
+#! /bin/sh
+# creates a new branch
+
+origin=$(git remote get-url origin 2> /dev/null)
+upstream=$(git remote get-url upstream 2> /dev/null)
+
+if [[ -n "${origin}" || -n "${upstream}" ]]; then
+  branch="$2"
+  if [[ -z "${branch}" ]]; then
+    echo "Usage $0 ignored-repo branch (in existing git directory)"
+    exit 1
+  fi
+  repo=$(echo "${origin}" | sed -e 's/:.*\//:mr-salty\//')
+  dir='.'
+else
+  repo_stub="$1"
+  branch="$2"
+  if [[ -z "${repo_stub}" || -z "${branch}" ]]; then
+    echo "Usage $0 repo branch"
+    exit 1
+  fi
+
+  # TODO make this work better
+  upstream="git@github.com:${repo_stub}.git"
+  fork=$(echo "${repo_stub}" | sed -e 's/.*\//mr-salty\//')
+  dir="${HOME}/git/$(echo ${repo_stub} | sed -e 's/.*\///; s/google-cloud-cpp-//; s/google-cloud-//')"
+  repo="git@github.com:${fork}.git"
+fi
+
+echo "Using repo '${repo}'"
+echo "  upstream '${upstream}'"
+echo "  dir '${dir}'"
+
+if [[ ! -d "${dir}" ]]; then
+  echo "Creating '${dir}' and checking out the main branch"
+  git clone "${repo}" "${dir}"
+  cd "${dir}"
+  git remote add -f upstream "${upstream}"
+else
+  cd "${dir}"
+fi
+
+
+if git branch -a | grep "remotes/origin/${branch}$"; then
+  echo "checking out existing branch origin/${branch}"
+  git checkout -t "origin/${branch}"
+else
+  echo "creating new branch origin/${branch}"
+  git checkout -b "${branch}"
+  git push --set-upstream origin "${branch}"
+fi
+
+echo ""
+echo "cd ${dir}"

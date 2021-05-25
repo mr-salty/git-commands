@@ -1,0 +1,19 @@
+#! /bin/sh
+# "removes" a client by moving it to the snapshot directory.
+
+readonly DEAD_CLIENTS_DIR="${HOME}/.git-snapshot/dead-clients"
+if [[ -z "$1" ]]; then
+  echo "usage: $0 directory"
+  exit 1
+fi
+
+if [[ ! -d "$1" || ! -d "$1/.git" ]]; then
+  echo "$1 is not a git client"
+  exit 1
+fi
+
+rm -rf "$1/cmake-out"
+
+
+[[ -d "${DEAD_CLIENTS_DIR}" ]] || mkdir -p "${DEAD_CLIENTS_DIR}"
+mv "$1" "${DEAD_CLIENTS_DIR}"
