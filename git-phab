@@ -1,0 +1,5 @@
+#! /bin/sh -e
+# create a phab/differential diff.
+
+git diff -U999999 --ignore-space-change "$(git rev-parse --show-toplevel)" | pbcopy
+exec open "https://${PHAB}/differential/diff/create"
