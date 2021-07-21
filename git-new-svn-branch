@@ -1,0 +1,16 @@
+#! /bin/sh -e
+# creates a new svn branch and switches to it in git
+
+if [[ -z "$1" ]]; then
+  echo "Usage $0 branch-name"
+  exit 1
+fi
+
+branch="$(whoami)-$1"
+echo "Creating new SVN branch ${branch}"
+
+git svn branch "${branch}"
+git checkout -b "${branch}" "origin/${branch}"
+
+echo "please verify this is pushing to the new branch rather than trunk:"
+git svn dcommit -n
