@@ -1,5 +1,13 @@
 #! /bin/sh
 # creates a new "client"
+#
+# the first argument should be an upstream repo name you have already made a
+# fork of on github - for example "Homebrew/homebrew-core"
+#
+# the second argument (optional) is the local directory name to use, if not
+# specified it will use the last part of the repo name ("homebrew-core") in
+# the example above.
+
 
 repo_stub="$1"
 dir="$2"
@@ -11,7 +19,8 @@ fi
 
 # TODO make this work better
 upstream="git@github.com:${repo_stub}.git"
-fork=$(echo "${repo_stub}" | sed -e 's/.*\//mr-salty\//')
+user=$(git user)
+fork=$(echo "${repo_stub}" | sed -e "s/.*\//${user}\//")
 repo="git@github.com:${fork}.git"
 
 echo "Using repo '${repo}'"
@@ -19,7 +28,7 @@ echo "  upstream '${upstream}'"
 
 use_main=0
 if [[ -z "${dir}" ]]; then
-  dir=$(expr match "${repo}" '.*/\([^/]*\)\.git')
+  dir=$(expr "${repo}" : '.*/\([^/]*\)\.git')
   if [[ -z "${dir}" ]]; then
     echo "unable to determine directory from '${repo}'"
     exit 1
@@ -37,6 +46,7 @@ git clone "${repo}" "${dir}"
 cd "${dir}"
 git remote add -f upstream "${upstream}"
 
+# TODO explain this in the comments (when I remember what it means)
 if [[ ${use_main} == 0 ]]; then
   if git branch -a | grep "remotes/origin/${dir}$"; then
     echo "checking out existing branch origin/${dir}"
