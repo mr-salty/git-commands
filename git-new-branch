@@ -3,6 +3,7 @@
 
 origin=$(git remote get-url origin 2> /dev/null)
 upstream=$(git remote get-url upstream 2> /dev/null)
+user=$(git user)
 
 if [[ -n "${origin}" || -n "${upstream}" ]]; then
   branch="$2"
@@ -10,7 +11,7 @@ if [[ -n "${origin}" || -n "${upstream}" ]]; then
     echo "Usage $0 ignored-repo branch (in existing git directory)"
     exit 1
   fi
-  repo=$(echo "${origin}" | sed -e 's/:.*\//:mr-salty\//')
+  repo=$(echo "${origin}" | sed -e "s/:.*\//:${user}\//")
   dir='.'
 else
   repo_stub="$1"
@@ -22,7 +23,7 @@ else
 
   # TODO make this work better
   upstream="git@github.com:${repo_stub}.git"
-  fork=$(echo "${repo_stub}" | sed -e 's/.*\//mr-salty\//')
+  fork=$(echo "${repo_stub}" | sed -e "s/.*\//${user}\//")
   dir="${HOME}/git/$(echo ${repo_stub} | sed -e 's/.*\///; s/google-cloud-cpp-//; s/google-cloud-//')"
   repo="git@github.com:${fork}.git"
 fi
