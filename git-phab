@@ -1,5 +1,9 @@
 #! /bin/sh -e
 # create a phab/differential diff.
 
+# -n don't open phab, just copy the diff to the clipboard.
+
 git diff -U999999 --ignore-space-change "$(git rev-parse --show-toplevel)" | pbcopy
-exec open "https://${PHAB}/differential/diff/create"
+if [[ "$1" != "-n" ]]; then
+  exec open "https://${PHAB}/differential/diff/create"
+fi
