@@ -13,6 +13,19 @@ run() {
   $@
 }
 
+if [[ -d ".git/svn" ]]; then
+  # assume this is a git-svn repo
+  run git svn fetch
+  run git stash --include-untracked
+  run git svn rebase
+
+  # todo: only pop if push did anything
+  run git stash pop
+
+  exit 0
+fi
+
+# regular git sync
 branch="$(git branch | grep \* | cut -d ' ' -f2)"
 main_branch="$(git main-branch)"
 if [[ "${branch}" != "${main_branch}" ]]; then

@@ -5,21 +5,22 @@
 bold=$(tput bold)
 normal=$(tput sgr0)
 
-projects=(google-cloud-cpp)
+projects=(bc/trunk bc/services)
 if [ "$1" == "-a" ]; then
   # really sync-all
   projects+=(googleapis grpc java-spanner)
 fi
 
 
-cd ${HOME}/git/Masters
+root="${HOME}/git"
+cd "${root}"
 for dir in ${projects[@]}; do
   if [[ -d ${dir} ]]; then
     echo "${bold}------------------------------------------------${normal}"
     echo "${bold}Syncing ${dir}${normal}"
     cd ${dir}
     git sync
-    cd ..
+    cd "${root}"
     echo ""
   fi
 done
